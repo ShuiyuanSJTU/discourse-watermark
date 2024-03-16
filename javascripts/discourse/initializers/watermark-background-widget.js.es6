@@ -2,6 +2,7 @@ import { withPluginApi } from "discourse/lib/plugin-api";
 import Category from "discourse/models/category";
 import { default as renderWatermarkDataURL } from "../helpers/render-watermark";
 import { getComputedColor, getComputedFont } from "../helpers/computed-values";
+import { schedule } from '@ember/runloop';
 
 export default {
   name: "watermark-background-widget",
@@ -225,7 +226,7 @@ export default {
 
         init() {
           // updates the watermark after renders
-          Ember.run.schedule("afterRender", () => {
+          schedule("afterRender", () => {
             if (this.shouldShowWatermark()) {
               this.renderWatermark();
               return;
