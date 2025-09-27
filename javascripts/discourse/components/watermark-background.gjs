@@ -2,7 +2,7 @@ import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import { schedule } from "@ember/runloop";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import Category from "discourse/models/category";
 import { getComputedColor, getComputedFont } from "../helpers/computed-values";
 import renderWatermarkDataURL from "../helpers/render-watermark";
@@ -18,7 +18,7 @@ export default class WatermarkBackground extends Component {
     "page:changed",
     // updates the watermark again if the header of the topic was updated
     // in case the category or tags were edited
-    "header:update-topic"
+    "header:update-topic",
   ];
 
   onlyInCategories = settings.only_in_categories
@@ -231,7 +231,7 @@ export default class WatermarkBackground extends Component {
       username: settings.display_username ? this.currentUser?.username : null,
       timestamp: settings.display_timestamp
         ? moment().format(settings.display_timestamp_format)
-        : null
+        : null,
     };
 
     const watermark = renderWatermarkDataURL(
@@ -241,7 +241,7 @@ export default class WatermarkBackground extends Component {
         color: resolvedColor,
         display_text_font: resolvedTextFont,
         display_username_font: resolvedUsernameFont,
-        display_timestamp_font: resolvedTimestampFont
+        display_timestamp_font: resolvedTimestampFont,
       },
       data
     );
