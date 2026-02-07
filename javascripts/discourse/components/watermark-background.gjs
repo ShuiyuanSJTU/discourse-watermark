@@ -159,7 +159,7 @@ export default class WatermarkBackground extends Component {
       showWatermark &&
       (this.onlyInTags.length > 0 || this.exceptInTags.length > 0)
     ) {
-      const tags = this.currentTags;
+      const tags = this.currentTags.map((tag) => tag.name);
 
       const testOnlyTags =
         this.onlyInTags.length === 0 ||
