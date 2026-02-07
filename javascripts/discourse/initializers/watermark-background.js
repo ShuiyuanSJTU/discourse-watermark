@@ -5,7 +5,7 @@ export default {
   name: "watermark-background-widget",
 
   initialize() {
-    withPluginApi("1.13.0", (api) => {
+    withPluginApi((api) => {
       api.renderInOutlet("above-site-header", WatermarkBackground);
     });
   },
