@@ -1,4 +1,5 @@
 import Component from "@glimmer/component";
+import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import { schedule } from "@ember/runloop";
@@ -13,6 +14,7 @@ export default class WatermarkBackground extends Component {
   @service router;
   @service siteSettings;
 
+  @tracked isWatermarkVisible = false;
   REFRESH_EVENTS = [
     // render on every page chance
     "page:changed",
@@ -35,6 +37,7 @@ export default class WatermarkBackground extends Component {
     .split("|")
     .filter((id) => id !== "")
     .map((v) => new RegExp(v));
+
   scrollEnabled = !!settings.scroll_enabled;
 
   #domElement;
@@ -44,6 +47,7 @@ export default class WatermarkBackground extends Component {
     this.REFRESH_EVENTS.forEach((eventName) =>
       this.appEvents.on(eventName, this, this.refreshWatermark)
     );
+    this.refreshWatermark();
   }
 
   willDestroy() {
@@ -118,6 +122,10 @@ export default class WatermarkBackground extends Component {
   get shouldShowWatermark() {
     const router = this.router;
 
+    if (!settings.show_watermark_in_background) {
+      return false;
+    }
+
     // check if there something to be rendered in the first place
     if (
       !(
@@ -184,29 +192,49 @@ export default class WatermarkBackground extends Component {
   @action
   setDomElement(element) {
     this.#domElement = element;
+
+    if (this.isWatermarkVisible) {
+      this.renderWatermark();
+    }
   }
 
   @action
   refreshWatermark() {
-    schedule("afterRender", () => {
-      if (this.shouldShowWatermark) {
-        this.renderWatermark();
-        return;
-      }
-
+    if (!this.shouldShowWatermark) {
       this.clearWatermark();
+      this.isWatermarkVisible = false;
+      this.#domElement = null;
+      return;
+    }
+
+    this.isWatermarkVisible = true;
+
+    schedule("afterRender", () => {
+      if (this.isWatermarkVisible) {
+        this.renderWatermark();
+      }
     });
   }
 
   @action
   clearWatermark() {
     const watermarkDiv = this.#domElement;
+
+    if (!watermarkDiv) {
+      return;
+    }
+
     watermarkDiv.style.backgroundImage = "";
   }
 
   @action
   renderWatermark() {
     const watermarkDiv = this.#domElement;
+
+    if (!watermarkDiv) {
+      return;
+    }
+
     const canvas = document.createElement("canvas");
 
     // we will use the dom element to resolve the CSS color even if
@@ -248,6 +276,7 @@ export default class WatermarkBackground extends Component {
 
     if (!watermark) {
       this.clearWatermark();
+      this.isWatermarkVisible = false;
       return;
     }
 
@@ -258,10 +287,12 @@ export default class WatermarkBackground extends Component {
   }
 
   <template>
-    <div
-      id="watermark-background"
-      class={{if this.scrollEnabled "scroll" "fixed"}}
-      {{didInsert this.setDomElement}}
-    />
+    {{#if this.isWatermarkVisible}}
+      <div
+        id="watermark-background"
+        class={{if this.scrollEnabled "scroll" "fixed"}}
+        {{didInsert this.setDomElement}}
+      />
+    {{/if}}
   </template>
 }
