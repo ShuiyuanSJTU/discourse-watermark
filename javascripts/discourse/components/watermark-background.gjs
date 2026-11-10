@@ -108,7 +108,7 @@ export default class WatermarkBackground extends Component {
       currentRoute.name === "topic.fromParams" ||
       currentRoute.name === "topic.fromParamsNear"
     ) {
-      return currentRoute.parent.attributes.tags;
+      return currentRoute.parent.attributes.tags ?? [];
     }
 
     // categories
